@@ -25,9 +25,9 @@
   "dependencies": {
     "@babel/preset-env": "^7.21.4"
   },
-  "browserlist": [
-    "not dead",
+  "browserslist": [
     "last 2 versions",
+    "not dead",
     "not ie <= 11",
     "not op_mini all",
     "not < 0.25%"
