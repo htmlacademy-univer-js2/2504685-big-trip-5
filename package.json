@@ -23,7 +23,8 @@
     "node": "20"
   },
   "dependencies": {
-    "@babel/preset-env": "^7.21.4"
+    "@babel/preset-env": "^7.21.4",
+    "dayjs": "^1.11.7"
   },
   "browserslist": [
     "last 2 versions",
