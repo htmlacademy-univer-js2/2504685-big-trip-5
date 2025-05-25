@@ -1,3 +1,5 @@
+import { Offers, getOffersId } from './mock/offers';
+
 const pointTypes = [
   'Taxi',
   'Bus',
@@ -12,20 +14,24 @@ const pointTypes = [
 
 const dates = [
   {
-    start: new Date(Date.UTC(2024, 8, 28, 8, 15, 0, 0)),
-    end: new Date(Date.UTC(2024, 8, 28, 10, 16, 0, 0))
-  },
-  {
-    start: new Date(Date.UTC(2024, 8, 20, 18, 30, 10, 0)),
-    end: new Date(Date.UTC(2024, 8, 21, 22, 30, 10, 0))
-  },
-  {
     start: new Date(Date.UTC(2024, 8, 25, 11, 14, 0, 0)),
     end: new Date(Date.UTC(2024, 8, 25, 14, 0, 0, 0))
   },
   {
-    start: new Date(Date.UTC(2024, 8, 25, 12, 1, 0, 0)),
-    end: new Date(Date.UTC(2024, 8, 25, 12, 2, 0, 0))
+    start: new Date(Date.UTC(2024, 5, 25, 12, 1, 0, 0)),
+    end: new Date(Date.UTC(2024, 5, 25, 12, 2, 0, 0))
+  },
+  {
+    start: new Date(Date.UTC(2024, 5, 11, 12, 1, 0, 0)),
+    end: new Date(Date.UTC(2024, 5, 25, 12, 2, 0, 0))
+  },
+  {
+    start: new Date(Date.UTC(2024, 0, 25, 12, 1, 0, 0)),
+    end: new Date(Date.UTC(2024, 0, 25, 12, 2, 0, 0))
+  },
+  {
+    start: new Date(Date.UTC(2024, 4, 10, 12, 1, 0, 0)),
+    end: new Date(Date.UTC(2024, 4, 20, 12, 2, 0, 0))
   },
 ];
 
@@ -39,7 +45,7 @@ const destinations = [
 
 const BLANC_TEST =
 {
-  type: null,
+  type: 'Bus',
   destination: null,
   cost: 0,
   date: {
@@ -49,8 +55,10 @@ const BLANC_TEST =
   offers: {
     id: 0
   },
+  activeOffers:
+    Offers[getOffersId('default')],
   desctiption:'',
-  photosSrc: []
+  photosSrc: ['https://loremflickr.com/248/152?random=$0)']
 };
 
 
@@ -76,5 +84,25 @@ const SortTypes = {
   BY_NAME: 'name',
 };
 
+const UserActions = {
+  UPDATE_POINT: 'update',
+  ADD_POINT: 'add',
+  DELETE_POINT: 'delete',
+};
 
-export {dates ,SortTypes, PresenterModes, MAX_PRICE, MAX_OFFER_ID,PHOTOS_COUNT,destinations, pointTypes, DATE_FORMAT_EDIT, DATE_FORMAT_POINT_DAY, DATE_FORMAT_POINT_HOURS, BLANC_TEST, POINTS_COUNT};
+
+const UpdateTypes = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
+const FilterTypes = {
+  ALL: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
+};
+
+
+export { FilterTypes, UserActions, UpdateTypes, dates ,SortTypes, PresenterModes, MAX_PRICE, MAX_OFFER_ID,PHOTOS_COUNT,destinations, pointTypes, DATE_FORMAT_EDIT, DATE_FORMAT_POINT_DAY, DATE_FORMAT_POINT_HOURS, BLANC_TEST, POINTS_COUNT};

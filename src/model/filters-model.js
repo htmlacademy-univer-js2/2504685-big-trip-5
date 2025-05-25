@@ -1,28 +1,18 @@
-import { dayjs } from 'dayjs';
+
+import { FilterTypes } from '../const';
+import Observable from '../framework/observable';
 
 
-export default class FiltersModel {
-  #isEmpty = true;
+export default class FiltersModel extends Observable {
 
-  #filters = {};
+  #filter = FilterTypes.ALL;
 
-  constructor (pointsCount) {
-    if(pointsCount > 0){
-      this.#isEmpty = false;
-    }
-    this.#filters = {
-      'everything': (data) => [...data],
-      'future': (data) => data.filter((point) => dayjs(point.date.start).isBefore(dayjs(new Date())).day),
-      'present': (data) => data.filter((point) => dayjs(point.date.start.day).isSame(dayjs(new Date()).day)),
-      'past': (data) => data.filter((point) => dayjs(point.date.start).isAfter(dayjs(new Date())).day)
-    };
+  get filter(){
+    return this.#filter;
   }
 
-  get filters(){
-    return this.#filters;
-  }
-
-  get isEmpty(){
-    return this.#isEmpty;
+  setFilter(updateType, filter) {
+    this.#filter = filter;
+    this._notify(updateType, filter);
   }
 }

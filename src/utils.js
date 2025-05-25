@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 
-
 const humanizeTaskDueDate = (dueDate, format) => dueDate ? dayjs(dueDate).format(format) : '';
 
 const countDuration = (dateStart, dateEnd) => {
@@ -57,8 +56,12 @@ const sortByEvent = (point1, point2) =>
 const sortByPrice = (point1, point2) =>
   point2.cost - point1.cost;
 
-const sortByOffers = (point1, point2) =>
-  point2.offers.length - point1.offers.length();
+const sortByOffers = (point1, point2) => {
+  const countCheckedOffers = (activeOffers) =>
+    activeOffers.filter((offer) => offer.checked).length;
+
+  return countCheckedOffers(point2.activeOffers) - countCheckedOffers(point1.activeOffers);
+};
 
 const sortByDefault = (point1, point2) => {
 
@@ -68,4 +71,22 @@ const sortByDefault = (point1, point2) => {
 
 };
 
-export{sortByDefault, sortByOffers, sortByPrice, sortByEvent, sortByTime, getRandomArrayElement, humanizeTaskDueDate, countDuration, getRandomInt, updateItem};
+const isPointPresent = (point) => {
+  const now = dayjs();
+  return (
+    dayjs(point.date.start).isSame(now) ||
+    (dayjs(point.date.start).isBefore(now) && dayjs(point.date.end).isAfter(now))
+  );
+};
+
+const filter = {
+  'everything': (data) => [...data],
+  'future': (data) => data.filter((point) => dayjs(point.date.start).isAfter(dayjs())),
+  'present': (data) => data.filter(isPointPresent),
+  'past': (data) => data.filter((point) => dayjs(point.date.end).isBefore(dayjs())),
+};
+
+const isEscKey = (key) => key === 'Escape';
+
+
+export{isEscKey, filter ,sortByDefault, sortByOffers, sortByPrice, sortByEvent, sortByTime, getRandomArrayElement, humanizeTaskDueDate, countDuration, getRandomInt, updateItem};

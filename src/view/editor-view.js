@@ -151,7 +151,10 @@ const createEditorView = ({type, destination, cost, date, desctiption, photosSrc
       </div>
     
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset">Cancel</button>
+      <button class="event__reset-btn" type="reset">Delete</button>
+      <button class="event__rollup-btn" type="button">
+        <span class="visually-hidden">Open event</span>
+      </button>
     </header>
     <section class="event__details">
       ${createOffersEdit(activeOffers)}
@@ -175,18 +178,22 @@ const createEditorView = ({type, destination, cost, date, desctiption, photosSrc
     `
   );
 export default class EditorView extends AbstractStatefulView{
-  #editClick;
-  #onPointChange;
+  #onSubmit;
   #datepickerFrom;
   #datepickerTo;
-  constructor({point = BLANC_TEST, onEditClick, onPointChange}) {
+  #deletePoint;
+  #point;
+
+  constructor({point = BLANC_TEST, onSubmit, deletePoint}) {
     super();
     this._setState(EditorView.parsePointToState(point));
 
-    this.#onPointChange = onPointChange;
-    this.#editClick = onEditClick;
+    this.#onSubmit = onSubmit;
 
     this._restoreHandlers();
+
+    this.#point = point;
+    this.#deletePoint = deletePoint;
 
   }
 
@@ -255,10 +262,13 @@ export default class EditorView extends AbstractStatefulView{
       .addEventListener('input', this.#onPriceInput);
 
     this.element
+      .querySelector('.event__reset-btn')
+      .addEventListener('click', this.#onDeleteButtonClick);
+
+    this.element
       .addEventListener('submit', this.#onFormSubmit);
 
-
-    this.element.querySelector('.event__reset-btn')
+    this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#onFormClose);
 
     this.element.querySelector('.event__input--destination')
@@ -306,17 +316,27 @@ export default class EditorView extends AbstractStatefulView{
     });
   };
 
+  reset(point) {
+    this.updateElement(
+      EditorView.parsePointToState(point),
+    );
+  }
 
   #onFormClose = (evt) => {
     evt.preventDefault();
-    this.#editClick(this._state);
+    this.reset(this.#point);
+    this.#onSubmit();
+  };
+
+  #onDeleteButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#deletePoint(EditorView.parseStateToPoint(this._state));
   };
 
   #onFormSubmit = (evt) => {
     evt.preventDefault();
+    this.#onSubmit(EditorView.parseStateToPoint(this._state));
     this.#onFormClose(evt);
-
-    this.#onPointChange(EditorView.parseStateToPoint(this._state));
   };
 
   #onDestinationChange = (evt) => {
@@ -325,10 +345,13 @@ export default class EditorView extends AbstractStatefulView{
     });
   };
 
-  #onPriceInput = (evt) =>{
-    this.updateElement({
-      cost: evt.target.value,
-    });
+  #onPriceInput = (evt) => {
+    const regex = /^\d{1,6}$/;
+    if (regex.test(evt.target.value)) {
+      this.updateElement({
+        cost: evt.target.value,
+      });
+    }
   };
 
   static parsePointToState(point){
