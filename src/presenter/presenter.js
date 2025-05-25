@@ -4,12 +4,13 @@ import {remove, render} from '../framework/render.js';
 import EmptyPointsView from '../view/no-points-view.js';
 import PointPresenter from './point-presenter.js';
 import { sortByTime, sortByPrice, sortByDefault, filter } from '../utils.js';
-import { SortTypes, UpdateTypes, UserActions, FilterTypes } from '../const.js';
+import { SortTypes, UpdateTypes, UserActions, FilterTypes, TimeLimit } from '../const.js';
 import FilterPresenter from './filter-presenter.js';
 import AddPointPresenter from './add-point-presenter.js';
 import LoadingView from '../view/loading-view.js';
 import addPointButtonView from '../view/add-point-button-view.js';
 import Observable from '../framework/observable.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 export default class Presenter extends Observable{
   #pointsContainer = new TripsContainer();
@@ -29,6 +30,17 @@ export default class Presenter extends Observable{
   #destinationsModel;
   #addPointPresenter;
   #filtersElement;
+
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
+
+  addPointButtonComponent = new addPointButtonView({
+    onClick: () => {
+      this.#createPoint();
+      this.addPointButtonComponent.element.disabled = true;
+    }});
 
   constructor(
     {
@@ -59,6 +71,7 @@ export default class Presenter extends Observable{
     ]).then(() => {
       this._notify(UpdateTypes.INIT);
     }).finally(() => {
+
       render(this.addPointButtonComponent, document.querySelector('.page-body__container'));
       this.#renderFilters();
 
@@ -66,20 +79,6 @@ export default class Presenter extends Observable{
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
-  }
-
-  handleAddPointButtonClick = () => {
-    this.#createPoint();
-    this.addPointButtonComponent.element.disabled = true;
-  };
-
-
-  addPointButtonComponent = new addPointButtonView({
-    onClick: this.handleAddPointButtonClick
-  });
-
-  onAddTaskClose() {
-    this.addPointButtonComponent.element.disabled = false;
   }
 
 
@@ -145,19 +144,36 @@ export default class Presenter extends Observable{
     });
   }
 
-  #handleViewAction = (actionType, updateType, newPoint) => {
+  #handleViewAction = async (actionType, updateType, newPoint) => {
+    this.#uiBlocker.block();
     switch (actionType) {
       case UserActions.UPDATE_POINT:
-        this.#pointsModel.updatePoint(updateType, newPoint);
+        this.#pointPresenters.get(newPoint.id).setSaving();
+        try{
+          await this.#pointsModel.updatePoint(updateType, newPoint);
+        } catch(err){
+          this.#pointPresenters.get(newPoint.id).setAbording();
+        }
         break;
       case UserActions.ADD_POINT:
-        this.#pointsModel.addPoint(updateType, newPoint);
+        this.#addPointPresenter.setSaving();
+        try{
+          await this.#pointsModel.addPoint(updateType, newPoint);
+        } catch (err){
+          this.#addPointPresenter.setAbording();
+        }
         break;
       case UserActions.DELETE_POINT:
-        this.#pointsModel.deletePoint(updateType, newPoint);
+        this.#pointPresenters.get(newPoint.id).setDeleting();
+        try{
+          await this.#pointsModel.deletePoint(updateType, newPoint);
+        } catch (err) {
+          this.pointPresenters.get(newPoint.id).setAbording();
+        }
         break;
-
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -176,9 +192,9 @@ export default class Presenter extends Observable{
       case UpdateTypes.INIT:
 
         this.#addPointPresenter = new AddPointPresenter({
-          pointsContainer: this.#mainContainerElement,
+          pointsContainer: this.#pointsContainer,
           onDataChange: this.#handleViewAction,
-          onDestroy: this.onAddTaskClose,
+          onDestroy: () => {this.addPointButtonComponent.element.disabled = false;},
           allOffers: this.#offersModel.offers,
           allDestinations: this.#destinationsModel.destinations,
         });
@@ -186,6 +202,7 @@ export default class Presenter extends Observable{
         this.#isLoading = false;
         this.#clearComponents();
         this.#renderComponents();
+
         break;
     }
   };
@@ -217,7 +234,7 @@ export default class Presenter extends Observable{
 
   #clearComponents({ resetSortType = false} = {}) {
     this.#addPointPresenter.destroy();
-    remove(this.#pointsContainer);
+
     this.#clearPoints();
 
     remove(this.#sortElement);

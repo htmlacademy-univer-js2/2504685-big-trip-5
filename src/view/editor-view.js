@@ -31,13 +31,13 @@ const createOptions = (currentType, allTypes) =>
 
 const createDestination = (destination, isActive) => `<option ${isActive ? 'selected' : ''} value="${destination}">${destination}</option>`;
 
-const createDestinations = (curType, curDestination, allDestinations) =>
+const createDestinations = (curType, curDestination, allDestinations, isDisabled) =>
   `<div class="event__field-group  event__field-group--destination">
     <label class="event__label  event__type-output" for="event-destination-1">
       ${curType}
     </label>
 
-    <select class="event__input  event__input--destination" id="destination-list-1">
+    <select class="event__input  event__input--destination" id="destination-list-1" ${isDisabled ? 'disabled' : ''}>
       ${curDestination !== '' ?
     allDestinations.map((destination) =>
       createDestination(destination.name, destination.id === curDestination)
@@ -50,7 +50,7 @@ const createDestinations = (curType, curDestination, allDestinations) =>
     </select>
   </div>`;
 
-const createOfferEdit = (currentTypeOffers, offers) => {
+const createOfferEdit = (currentTypeOffers, offers, isDisabled) => {
   let res = '';
 
 
@@ -61,7 +61,7 @@ const createOfferEdit = (currentTypeOffers, offers) => {
     }
     res += `
     <div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="${offer.id}-1" type="checkbox" name="${offer.id}" ${ isActive ? 'checked' : ''}>
+      <input class="event__offer-checkbox  visually-hidden" id="${offer.id}-1" type="checkbox" name="${offer.id}" ${ isActive ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
       <label class="event__offer-label" for="${offer.id}-1">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -74,20 +74,32 @@ const createOfferEdit = (currentTypeOffers, offers) => {
 };
 
 
-const createOffersEdit = (currentTypeOffers, offers) =>
+const createOffersEdit = (currentTypeOffers, offers, isDisabled) =>
   `
   <section class="event__section  event__section--offers">
   <h3 class="event__section-title  event__section-title--offers">Offers</h3>
     <div class="event__available-offers">
-      ${createOfferEdit(currentTypeOffers, offers) }
+      ${createOfferEdit(currentTypeOffers, offers, isDisabled) }
     </div>
   </section>
   `;
 
+const createButtons = (isNew, isDisabled, isDeleting, isSaving) =>{
+  const saveButtonText = isSaving ? 'Saving...' : 'Save';
+  const resetButtonText = isNew ? 'Cancel' : 'Delete';
+
+  return(`
+  <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${saveButtonText}</button>
+  <button class="event__reset-btn" type="reset"? ${isDisabled ? 'disabled' : ''}>${isDeleting ? 'Deleting...' : resetButtonText}</button>
+  ${isNew ? '' : '<button class="event__rollup-btn" type="button">'}
+
+`);};
+
 const createEditorView = (point, allOffers, allDestinations) =>{
+
   const curDestinationData = allDestinations.find(({id}) => id === point.destination);
 
-  const {type, destination, cost, date, offers, isNew} = point;
+  const {type, destination, cost, date, offers, isNew, isDeleting, isSaving, isDisabled} = point;
 
   const currentTypeOffers = allOffers[point.type];
 
@@ -101,20 +113,20 @@ const createEditorView = (point, allOffers, allDestinations) =>{
           <span class="visually-hidden">Choose event type</span>
           <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
         </label>
-        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
     
         ${createOptions(type, Object.keys(allOffers))}
         
       </div>
     
-      ${createDestinations(type, destination, allDestinations)}
+      ${createDestinations(type, destination, allDestinations, isDisabled)}
     
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${humanizeTaskDueDate(date.start, DATE_FORMAT_EDIT)}">
+        <input  class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${humanizeTaskDueDate(date.start, DATE_FORMAT_EDIT)}" ${isDisabled ? 'disabled' : ''}>
         &mdash;
         <label claыss="visually-hidden" for="event-end-time-1">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${humanizeTaskDueDate(date.end, DATE_FORMAT_EDIT)}">
+        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${humanizeTaskDueDate(date.end, DATE_FORMAT_EDIT)}" ${isDisabled ? 'disabled' : ''}>
       </div>
     
       <div class="event__field-group  event__field-group--price">
@@ -122,17 +134,14 @@ const createEditorView = (point, allOffers, allDestinations) =>{
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}" ${isDisabled ? 'disabled' : ''}>
       </div>
-    
-      <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset"?>${isNew ? 'Cancel' : 'Delete'}</button>
-      <button class="event__rollup-btn" type="button">
+        ${createButtons(isNew, isDisabled, isDeleting, isSaving)}
         <span class="visually-hidden">Open event</span>
       </button>
     </header>
     <section class="event__details">
-      ${createOffersEdit(currentTypeOffers, offers)}
+      ${createOffersEdit(currentTypeOffers, offers, isDisabled)}
 
     
       <section class="event__section  event__section--destination">
@@ -252,10 +261,10 @@ export default class EditorView extends AbstractStatefulView{
 
     this.element
       .addEventListener('submit', this.#onFormSubmit);
-
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#onFormClose);
-
+    if(!this._state.isNew){
+      this.element.querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#onFormClose);
+    }
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#onDestinationChange);
 
@@ -311,7 +320,6 @@ export default class EditorView extends AbstractStatefulView{
   #onFormSubmit = (evt) => {
     evt.preventDefault();
     this.#onSubmit(EditorView.parseStateToPoint(this._state));
-    this.#onFormClose(evt);
   };
 
   #onDestinationChange = (evt) => {
@@ -335,12 +343,20 @@ export default class EditorView extends AbstractStatefulView{
     return {
       ...point,
       isNew: isNew,
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
     };
   }
 
   static parseStateToPoint(state){
     const point = {...state };
+
     delete point.isNew;
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
     return point;
+
   }
 }
