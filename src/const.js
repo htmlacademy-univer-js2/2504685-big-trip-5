@@ -1,63 +1,17 @@
-import { Offers, getOffersId } from './mock/offers';
-
-const pointTypes = [
-  'Taxi',
-  'Bus',
-  'Train',
-  'Ship',
-  'Drive',
-  'Flight',
-  'Check-in',
-  'Sightseeing',
-  'Restaurant'
-];
-
-const dates = [
-  {
-    start: new Date(Date.UTC(2024, 8, 25, 11, 14, 0, 0)),
-    end: new Date(Date.UTC(2024, 8, 25, 14, 0, 0, 0))
-  },
-  {
-    start: new Date(Date.UTC(2024, 5, 25, 12, 1, 0, 0)),
-    end: new Date(Date.UTC(2024, 5, 25, 12, 2, 0, 0))
-  },
-  {
-    start: new Date(Date.UTC(2024, 5, 11, 12, 1, 0, 0)),
-    end: new Date(Date.UTC(2024, 5, 25, 12, 2, 0, 0))
-  },
-  {
-    start: new Date(Date.UTC(2024, 0, 25, 12, 1, 0, 0)),
-    end: new Date(Date.UTC(2024, 0, 25, 12, 2, 0, 0))
-  },
-  {
-    start: new Date(Date.UTC(2024, 4, 10, 12, 1, 0, 0)),
-    end: new Date(Date.UTC(2024, 4, 20, 12, 2, 0, 0))
-  },
-];
-
-
-const destinations = [
-  'Ulan-Ude',
-  'Amsterdam',
-  'Prague',
-  'Luxembourg',
-];
-
 const BLANC_TEST =
 {
-  type: 'Bus',
+  type: 'bus',
   destination: null,
   cost: 0,
   date: {
     start: null,
     end: null,
   },
-  offers: {
-    id: 0
-  },
+  offers: [
+  ],
   activeOffers:
-    Offers[getOffersId('default')],
-  desctiption:'',
+    0,
+  description:'',
   photosSrc: ['https://loremflickr.com/248/152?random=$0)']
 };
 
@@ -80,8 +34,6 @@ const SortTypes = {
   DEFAULT: 'default',
   BY_PRICE: 'price',
   BY_TIME: 'time',
-  BY_OFFERS: 'offers',
-  BY_NAME: 'name',
 };
 
 const UserActions = {
@@ -95,6 +47,7 @@ const UpdateTypes = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 const FilterTypes = {
@@ -105,4 +58,8 @@ const FilterTypes = {
 };
 
 
-export { FilterTypes, UserActions, UpdateTypes, dates ,SortTypes, PresenterModes, MAX_PRICE, MAX_OFFER_ID,PHOTOS_COUNT,destinations, pointTypes, DATE_FORMAT_EDIT, DATE_FORMAT_POINT_DAY, DATE_FORMAT_POINT_HOURS, BLANC_TEST, POINTS_COUNT};
+const AUTHORIZATION = 'Basic y16e6n415ya12nsj12jkosad';
+const END_POINT = 'https://21.objects.htmlacademy.pro/big-trip';
+
+
+export {AUTHORIZATION, END_POINT, FilterTypes, UserActions, UpdateTypes ,SortTypes, PresenterModes, MAX_PRICE, MAX_OFFER_ID,PHOTOS_COUNT, DATE_FORMAT_EDIT, DATE_FORMAT_POINT_DAY, DATE_FORMAT_POINT_HOURS, BLANC_TEST, POINTS_COUNT};

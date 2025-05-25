@@ -43,50 +43,37 @@ function getWeightForNullDate(dateA, dateB) {
   return null;
 }
 
-const sortByTime = (point1, point2) => {
-  const time1 = dayjs(point1.date.start).hour() * 60 + dayjs(point1.date.start).minute();
-  const time2 = dayjs(point2.date.start).hour() * 60 + dayjs(point2.date.start).minute();
-
-  return getWeightForNullDate(point1.date.start, point2.date.start) ?? time1 - time2;
-};
-
-const sortByEvent = (point1, point2) =>
-  point1.type[0].localeCompare(point2.type[0]);
+const sortByTime = (point1, point2) => (
+  (new Date(point2.date.end) - new Date(point2.date.start)) -
+  (new Date(point1.date.end) - new Date(point1.date.start))
+);
 
 const sortByPrice = (point1, point2) =>
   point2.cost - point1.cost;
-
-const sortByOffers = (point1, point2) => {
-  const countCheckedOffers = (activeOffers) =>
-    activeOffers.filter((offer) => offer.checked).length;
-
-  return countCheckedOffers(point2.activeOffers) - countCheckedOffers(point1.activeOffers);
-};
 
 const sortByDefault = (point1, point2) => {
 
   const weight = getWeightForNullDate(point1.date.start, point2.date.start);
 
-  return weight ?? dayjs(point1.date.start).diff(dayjs(point2.date.start));
+  return weight ?? dayjs(point2.date.start).diff(dayjs(point1.date.start));
 
 };
 
-const isPointPresent = (point) => {
-  const now = dayjs();
-  return (
-    dayjs(point.date.start).isSame(now) ||
-    (dayjs(point.date.start).isBefore(now) && dayjs(point.date.end).isAfter(now))
-  );
-};
 
 const filter = {
-  'everything': (data) => [...data],
-  'future': (data) => data.filter((point) => dayjs(point.date.start).isAfter(dayjs())),
-  'present': (data) => data.filter(isPointPresent),
-  'past': (data) => data.filter((point) => dayjs(point.date.end).isBefore(dayjs())),
+  'everything': (points) => points,
+  'future': (points) => points.filter((point) => dayjs().isBefore(dayjs(point.date.start), 'day')),
+  'present': (points) => points.filter((point) => {
+    const now = dayjs();
+    const startDate = dayjs(point.date.start);
+    const endDate = dayjs(point.date.end);
+    return (now.isAfter(startDate, 'day') || now.isSame(startDate, 'day')) &&
+           (now.isBefore(endDate, 'day') || now.isSame(endDate, 'day'));
+  }),
+  'past': (points) => points.filter((point) => dayjs().isAfter(dayjs(point.date.end), 'day')),
 };
 
 const isEscKey = (key) => key === 'Escape';
 
 
-export{isEscKey, filter ,sortByDefault, sortByOffers, sortByPrice, sortByEvent, sortByTime, getRandomArrayElement, humanizeTaskDueDate, countDuration, getRandomInt, updateItem};
+export{isEscKey, filter ,sortByDefault, sortByPrice, sortByTime, getRandomArrayElement, humanizeTaskDueDate, countDuration, getRandomInt, updateItem};

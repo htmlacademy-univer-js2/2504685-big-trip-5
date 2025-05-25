@@ -3,17 +3,20 @@ import TripsContainer from '../view/tripsContainer-view.js';
 import {remove, render} from '../framework/render.js';
 import EmptyPointsView from '../view/no-points-view.js';
 import PointPresenter from './point-presenter.js';
-import { sortByTime, sortByEvent, sortByPrice, sortByOffers, sortByDefault, filter } from '../utils.js';
+import { sortByTime, sortByPrice, sortByDefault, filter } from '../utils.js';
 import { SortTypes, UpdateTypes, UserActions, FilterTypes } from '../const.js';
 import FilterPresenter from './filter-presenter.js';
 import AddPointPresenter from './add-point-presenter.js';
+import LoadingView from '../view/loading-view.js';
+import addPointButtonView from '../view/add-point-button-view.js';
+import Observable from '../framework/observable.js';
 
-export default class Presenter {
+export default class Presenter extends Observable{
   #pointsContainer = new TripsContainer();
   #headerElement;
-  #onAddTaskClose;
+
   #mainContainerElement;
-  #filtersElement;
+  #loadingComponent;
   #pointsModel;
   #filterModel;
   #noPointsComponent = null;
@@ -21,9 +24,11 @@ export default class Presenter {
   #currentSort = SortTypes.DEFAULT;
   #filterType = FilterTypes.ALL;
   #pointPresenters = new Map();
-  #addPointButton;
-
+  #isLoading = true;
+  #offersModel;
+  #destinationsModel;
   #addPointPresenter;
+  #filtersElement;
 
   constructor(
     {
@@ -31,28 +36,54 @@ export default class Presenter {
       tripsSection,
       pointsModel,
       filterModel,
-      addPointButton,
-      onAddTaskClose
+      offersModel,
+      destinationsModel,
     }){
+
+    super();
     this.#headerElement = controlsDiv;
+
     this.#mainContainerElement = tripsSection;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
-    this.#addPointButton = addPointButton;
-    this.#onAddTaskClose = onAddTaskClose;
+    this.#offersModel = offersModel;
+    this.#destinationsModel = destinationsModel;
 
-    this.#addPointPresenter = new AddPointPresenter({
-      pointsContainer: this.#mainContainerElement,
-      onDataChange: this.#handleViewAction,
-      onDestroy: this.#onAddTaskClose
+
+    this.addObserver(this.#handleModelEvent);
+
+    Promise.all([
+      this.#pointsModel.init(),
+      this.#offersModel.init(),
+      this.#destinationsModel.init(),
+    ]).then(() => {
+      this._notify(UpdateTypes.INIT);
+    }).finally(() => {
+      render(this.addPointButtonComponent, document.querySelector('.page-body__container'));
+      this.#renderFilters();
+
     });
-
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
-  createPoint() {
+  handleAddPointButtonClick = () => {
+    this.#createPoint();
+    this.addPointButtonComponent.element.disabled = true;
+  };
+
+
+  addPointButtonComponent = new addPointButtonView({
+    onClick: this.handleAddPointButtonClick
+  });
+
+  onAddTaskClose() {
+    this.addPointButtonComponent.element.disabled = false;
+  }
+
+
+  #createPoint() {
     this.#currentSort = SortTypes.DEFAULT;
     this.#filterModel.setFilter(UpdateTypes.MAJOR, FilterTypes.ALL);
     this.#addPointPresenter.init();
@@ -60,23 +91,19 @@ export default class Presenter {
 
 
   init() {
-    this.#renderFilters();
     this.#renderComponents();
   }
 
   get points() {
     this.#filterType = this.#filterModel.filter;
     const points = this.#pointsModel.points;
+
     const filteredPoints = filter[this.#filterType](points);
     switch (this.#currentSort) {
       case SortTypes.BY_TIME:
         return filteredPoints.sort(sortByTime);
-      case SortTypes.BY_NAME:
-        return filteredPoints.sort(sortByEvent);
       case SortTypes.BY_PRICE:
         return filteredPoints.sort(sortByPrice);
-      case SortTypes.BY_OFFERS:
-        return filteredPoints.sort(sortByOffers);
       case SortTypes.DEFAULT:
         return filteredPoints.sort(sortByDefault);
     }
@@ -86,9 +113,11 @@ export default class Presenter {
   #renderPoint = (point) => {
     const pointPresenter = new PointPresenter(
       {
+        offers: this.#offersModel.offers,
+        destinations: this.#destinationsModel.destinations,
         pointsContainer: this.#pointsContainer.element,
         onPointChange: this.#handleViewAction,
-        onModeChange: this.#onModeChange
+        onModeChange: this.#onModeChange,
       }
     );
     pointPresenter.init(point);
@@ -105,7 +134,15 @@ export default class Presenter {
       filterType: this.#filterType
     });
 
-    render(new EmptyPointsView(), this.#mainContainerElement);
+    render(this.#noPointsComponent, this.#mainContainerElement);
+  }
+
+  #renderFilters(){
+    this.#filtersElement = new FilterPresenter({
+      filterContainer: this.#headerElement,
+      filterModel: this.#filterModel,
+      pointsModel: this.#pointsModel
+    });
   }
 
   #handleViewAction = (actionType, updateType, newPoint) => {
@@ -119,6 +156,7 @@ export default class Presenter {
       case UserActions.DELETE_POINT:
         this.#pointsModel.deletePoint(updateType, newPoint);
         break;
+
     }
   };
 
@@ -135,6 +173,20 @@ export default class Presenter {
         this.#clearComponents({resetSortType : true});
         this.#renderComponents();
         break;
+      case UpdateTypes.INIT:
+
+        this.#addPointPresenter = new AddPointPresenter({
+          pointsContainer: this.#mainContainerElement,
+          onDataChange: this.#handleViewAction,
+          onDestroy: this.onAddTaskClose,
+          allOffers: this.#offersModel.offers,
+          allDestinations: this.#destinationsModel.destinations,
+        });
+
+        this.#isLoading = false;
+        this.#clearComponents();
+        this.#renderComponents();
+        break;
     }
   };
 
@@ -147,6 +199,12 @@ export default class Presenter {
     this.#clearComponents();
     this.#renderComponents();
   };
+
+  #renderLoading(){
+    this.#loadingComponent = new LoadingView();
+
+    render(this.#loadingComponent, this.#mainContainerElement);
+  }
 
   #renderSort(){
     this.#sortElement = new SortView({
@@ -161,8 +219,9 @@ export default class Presenter {
     this.#addPointPresenter.destroy();
     remove(this.#pointsContainer);
     this.#clearPoints();
-    remove(this.#sortElement);
 
+    remove(this.#sortElement);
+    remove(this.#loadingComponent);
 
     if (this.#noPointsComponent) {
       remove(this.#noPointsComponent);
@@ -173,23 +232,13 @@ export default class Presenter {
   }
 
 
-  #renderFilters(){
-    this.#filtersElement = new FilterPresenter({
-      filterContainer: this.#headerElement,
-      filterModel: this.#filterModel,
-      pointsModel: this.#pointsModel
-    });
-  }
-
-
   #renderPointsContainer(){
     render(this.#pointsContainer, this.#mainContainerElement);
   }
 
   #initPoints(){
     this.#renderPointsContainer();
-
-    if(this.#pointsModel.points.length === 0){
+    if(this.#pointsModel.points.length === 0 && !this.#isLoading){
       this.#renderEmptyPoints();
     }
   }
@@ -200,8 +249,15 @@ export default class Presenter {
   }
 
   #renderComponents() {
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     this.#renderSort();
     this.#initPoints();
+
 
     this.#renderPoints(this.points);
   }
