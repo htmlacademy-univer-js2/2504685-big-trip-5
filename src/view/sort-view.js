@@ -1,7 +1,8 @@
 
-import { SortTypes } from '../const.js';
+import { SortTypes } from '../const/point-const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
+function createSortTemplate(sort) {
 function createSortTemplate(sort) {
   return (
     `
@@ -12,7 +13,7 @@ function createSortTemplate(sort) {
             </div>
 
             <div class="trip-sort__item  trip-sort__item--event">
-                <input id="sort-event" class="trip-sort__input  visually-hidden" data-sort-type="${SortTypes.BY_NAME}" type="radio" name="trip-sort" value="sort-event" disabled>
+                <input id="sort-event" class="trip-sort__input  visually-hidden" data-sort-type="" type="radio" name="trip-sort" value="sort-event" disabled>
                 <label class="trip-sort__btn" for="sort-event">Event</label>
             </div>
 
@@ -27,7 +28,7 @@ function createSortTemplate(sort) {
             </div>
 
             <div class="trip-sort__item  trip-sort__item--offer">
-                <input id="sort-offer" class="trip-sort__input  visually-hidden" data-sort-type="${SortTypes.BY_OFFERS}" type="radio" name="trip-sort" value="sort-offer" disabled>
+                <input id="sort-offer" class="trip-sort__input  visually-hidden" data-sort-type="" type="radio" name="trip-sort" value="sort-offer" disabled>
                 <label class="trip-sort__btn" for="sort-offer">Offers</label>
             </div>
         </form>`
@@ -48,8 +49,28 @@ export default class SortView extends AbstractView {
 
   get template() {
     return createSortTemplate(this.#currentSort);
+export default class SortView extends AbstractView {
+  #currentSort;
+  #onSort;
+
+  constructor({currentSort, onSort}){
+    super();
+    this.#currentSort = currentSort;
+    this.#onSort = onSort;
+
+    this.element.addEventListener('click', this.#onSortClick);
   }
 
+  get template() {
+    return createSortTemplate(this.#currentSort);
+  }
+
+  #onSortClick = (evt) => {
+    if(evt.target.tagName !== 'INPUT'){
+      return;
+    }
+    this.#onSort(evt.target.dataset.sortType);
+  };
   #onSortClick = (evt) => {
     if(evt.target.tagName !== 'INPUT'){
       return;

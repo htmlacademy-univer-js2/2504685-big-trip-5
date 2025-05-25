@@ -8,6 +8,11 @@ function createNoPointsTemplate() {
 }
 
 export default class LoadingView extends AbstractView {
+
+  constructor(){
+    super();
+  }
+
   get template() {
     return createNoPointsTemplate();
   }
