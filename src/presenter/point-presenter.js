@@ -38,6 +38,7 @@ export default class PointPresenter {
     const prevEdit = this.#editComponent;
 
     this.#point = point;
+
     this.#pointComponent = new TripsView(
       {
         point: this.#point,
@@ -55,7 +56,8 @@ export default class PointPresenter {
         onEditClick: () =>{
           this.#replaceEditToPoint();
           document.removeEventListener('keydown', this.#onDocumentKeyDown);
-        }
+        },
+        onPointChange: this.#onPointChange
       }
     );
     if(prevPoint === null || prevEdit === null){
