@@ -1,15 +1,12 @@
 import { getRandomArrayElement, getRandomInt } from '../utils';
-import { pointTypes, destinations, POINTS_COUNT, PHOTOS_COUNT, MAX_OFFER_ID, MAX_PRICE } from '../const';
+import { pointTypes, destinations, POINTS_COUNT, PHOTOS_COUNT, MAX_OFFER_ID, MAX_PRICE, dates } from '../const';
 import { nanoid } from 'nanoid';
 
 const createPoint = () =>({
   type: getRandomArrayElement(pointTypes),
   destination: getRandomArrayElement(destinations),
   cost: getRandomInt(MAX_PRICE),
-  date:{
-    start: Date(2024, 8, 20, 18, 30, 10, 0),
-    end: Date(2024, 8, 20, 20, 30, 10, 0)
-  },
+  date:getRandomArrayElement(dates),
   offers:{
     id: getRandomInt(MAX_OFFER_ID)
   },
