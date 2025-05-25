@@ -3,6 +3,9 @@ import { humanizeTaskDueDate } from '../utils.js';
 import { BLANC_TEST, destinations } from '../const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { Offers, getOffersId } from '../mock/offers.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 
 const createPicture = (picture) =>
@@ -174,6 +177,8 @@ const createEditorView = ({type, destination, cost, date, desctiption, photosSrc
 export default class EditorView extends AbstractStatefulView{
   #editClick;
   #onPointChange;
+  #datepickerFrom;
+  #datepickerTo;
   constructor({point = BLANC_TEST, onEditClick, onPointChange}) {
     super();
     this._setState(EditorView.parsePointToState(point));
@@ -187,6 +192,61 @@ export default class EditorView extends AbstractStatefulView{
 
   get template() {
     return createEditorView(this._state);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+    else if(this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
+  }
+
+  #onDateChangeFrom = ([userDate]) => {
+    this.updateElement({
+      date: {
+        start: userDate,
+        end: this._state.date.end
+      },
+    });
+  };
+
+  #onDateChangeTo = ([userDate]) => {
+    this.updateElement({
+      date: {
+        start: this._state.date.start,
+        end: userDate
+      }
+    });
+  };
+
+  #setDatepickers() {
+    const timeInputs = this.element.querySelectorAll('.event__input--time');
+    if (this._state.date) {
+      this.#datepickerFrom = flatpickr(
+        timeInputs[0],
+        {
+          enableTime: true,
+          dateFormat: 'd/m/y H:i',
+          defaultDate: '',
+          onChange: this.#onDateChangeFrom,
+        },
+      );
+      this.#datepickerTo = flatpickr(
+        timeInputs[1],
+        {
+          enableTime: true,
+          dateFormat: 'd/m/y H:i',
+          defaultDate: '',
+          onChange: this.#onDateChangeTo,
+        }
+      );
+    }
   }
 
   _restoreHandlers() {
@@ -211,6 +271,8 @@ export default class EditorView extends AbstractStatefulView{
     checkboxOffers.forEach((checkbox) => {
       checkbox.addEventListener('change', this.#onOffersChange);
     });
+
+    this.#setDatepickers();
   }
 
   #onOffersChange = (evt) => {

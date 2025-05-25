@@ -1,35 +1,61 @@
-import { getRandomArrayElement, getRandomInt } from '../utils';
-import { pointTypes, destinations, POINTS_COUNT, PHOTOS_COUNT, MAX_PRICE, dates } from '../const';
-import { nanoid } from 'nanoid';
-import { Offers, getOffersId } from './offers';
 
-
-const createPoint = () =>({
-  type: getRandomArrayElement(pointTypes),
-  destination: getRandomArrayElement(destinations),
-  cost: getRandomInt(MAX_PRICE),
-  date:getRandomArrayElement(dates),
-  offers:{
-    id: 0,
-  },
-  desctiption:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra.',
-  photosSrc:[`https://loremflickr.com/248/152?random=${getRandomInt(PHOTOS_COUNT)}`],
-
-});
-
-const mockPoints = Array.from( {length: POINTS_COUNT} , createPoint);
-
-const getRandomPoint = () => {
-  const point = getRandomArrayElement(mockPoints);
-  return {
-    ...point,
-    id: nanoid(),
-    offers:{
-      id: getOffersId(point.type),
+const Offers = {
+  0:[
+    {
+      text:'test',
+      cost:228,
+      name:'event-offer-test',
+      checked: false,
+    }
+  ],
+  1: [
+    {
+      text: 'Rent a car',
+      cost: 80,
+      name: 'event-offer-rent',
+      checked: false,
+    }
+  ],
+  2:[
+    {
+      text: 'Add luggage',
+      cost: 50,
+      name: 'event-offer-luggage',
+      checked: false,
     },
-    activeOffers:
-      Offers[getOffersId(point.type)],
-  };
+    {
+      text:'Switch to comfort',
+      cost: 80,
+      name: 'event-offer-comfort',
+      checked: false,
+    },
+  ],
+  3:[
+    {
+      text:'Add breakfast',
+      cost: 50,
+      name: 'event-offer-breakfast',
+      checked: false,
+    },
+  ],
 };
 
-export {getRandomPoint};
+const getOffersId = (type) => {
+  switch(type.toLowerCase()){
+    case ('drive'):{
+      return 1;
+    }
+    case ('flight'):{
+      return 2;
+    }
+    case ('check-in'):{
+      return 3;
+    }
+    default: {
+      return 0;
+    }
+  }
+};
+
+
+export {Offers, getOffersId};

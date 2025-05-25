@@ -1,9 +1,23 @@
 import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
 
 
 const humanizeTaskDueDate = (dueDate, format) => dueDate ? dayjs(dueDate).format(format) : '';
 
-const countDuration = (dateStart, dateEnd) => dayjs(dateEnd).diff(dateStart, 'm');
+const countDuration = (dateStart, dateEnd) => {
+
+  dayjs.extend(duration);
+  const diff = dayjs.duration(dayjs(dateEnd).diff(dateStart));
+
+  if (diff.asHours() < 1) {
+    return `${diff.minutes()}M`;
+  } else if (diff.asDays() < 1) {
+    return `${diff.hours()}H ${diff.minutes()}M`;
+  } else {
+    return `${diff.days()}D ${diff.hours()}H ${diff.minutes()}M`;
+  }
+};
+
 
 const getRandomInt = (maxNumber) => Math.floor(Math.random() * maxNumber);
 
