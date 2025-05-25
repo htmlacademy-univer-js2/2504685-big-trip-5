@@ -2,24 +2,19 @@ import { countDuration, humanizeTaskDueDate } from '../utils.js';
 import {DATE_FORMAT_POINT_DAY, DATE_FORMAT_POINT_HOURS } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
-const createOffers = (offers) => {
-  let res = '';
-  offers.forEach((offer) => {
-    if(offer.checked){
-      res += `
-      <li class="event__offer">
-        <span class="event__offer-title">${offer.text}</span>
-        +€&nbsp;
-        <span class="event__offer-price">${offer.cost}</span>
-      </li>
-      `;
-    }
-  });
-  return res;
-};
+const createOffer = ({title, cost}) =>
+  `
+  <li class="event__offer">
+    <span class="event__offer-title">${title}</span>
+    +€&nbsp;
+    <span class="event__offer-price">${cost}</span>
+  </li>
+  `;
+
+const createOffers = (offers) => Array.from(offers, createOffer);
 
 
-function createPointsTemplate({type, destination, cost, date, activeOffers, isFavorite}) {
+function createTripsTemplate({type, destination, cost, date, offers}) {
   return (
     `
     <li class="trip-events__item">
@@ -42,9 +37,9 @@ function createPointsTemplate({type, destination, cost, date, activeOffers, isFa
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${createOffers(activeOffers)}
+          ${createOffers(offers)}
         </ul>
-        <button class="event__favorite-btn ${isFavorite ? 'event__favorite-btn--active' : ''}" type="button">
+        <button class="event__favorite-btn event__favorite-btn--active" type="button">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
             <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
@@ -61,25 +56,22 @@ function createPointsTemplate({type, destination, cost, date, activeOffers, isFa
 
 export default class TripsView extends AbstractView{
   #point;
-  #pointClick;
-  #onFavoriteClick;
+  #tripClick;
 
-  constructor({point, onTripClick: onPointClick, onFavoriteClick}){
+  constructor({point, onTripClick}){
     super();
     this.#point = point;
-    this.#pointClick = onPointClick;
-    this.#onFavoriteClick = onFavoriteClick;
+    this.#tripClick = onTripClick;
 
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
-    this.element.querySelector('.event__favorite-btn ').addEventListener('click', this.#onFavoriteClick);
   }
 
   get template() {
-    return createPointsTemplate(this.#point);
+    return createTripsTemplate(this.#point);
   }
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
-    this.#pointClick();
+    this.#tripClick();
   };
 }
