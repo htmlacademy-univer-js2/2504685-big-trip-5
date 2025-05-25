@@ -1,21 +1,12 @@
 import dayjs from 'dayjs';
 
-const DATE_FORMAT = 'D MMMM';
 
-function getRandomArrayElement(items) {
-  return items[Math.floor(Math.random() * items.length)];
-}
+const humanizeTaskDueDate = (dueDate, format) => dueDate ? dayjs(dueDate).format(format) : '';
 
-function humanizeTaskDueDate(dueDate) {
-  return dueDate ? dayjs(dueDate).format(DATE_FORMAT) : '';
-}
+const countDuration = (dateStart, dateEnd) => dayjs(dateEnd).diff(dateStart, 'm');
 
-function isTaskExpired(dueDate) {
-  return dueDate && dayjs().isAfter(dueDate, 'D');
-}
+const getRandomInt = (maxNumber) => Math.floor(Math.random() * maxNumber);
 
-function isTaskRepeating(repeating) {
-  return Object.values(repeating).some(Boolean);
-}
+const getRandomArrayElement = (items) => items[getRandomInt(items.length)];
 
-export {getRandomArrayElement, humanizeTaskDueDate, isTaskExpired, isTaskRepeating};
+export{getRandomArrayElement, humanizeTaskDueDate, countDuration, getRandomInt};
