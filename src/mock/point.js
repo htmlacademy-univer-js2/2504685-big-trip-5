@@ -1,11 +1,10 @@
 import { getRandomArrayElement, getRandomInt } from '../utils';
 import { pointTypes, destinations, POINTS_COUNT, PHOTOS_COUNT, MAX_OFFER_ID, MAX_PRICE } from '../const';
+import { nanoid } from 'nanoid';
 
-
-const createPoint = (id) =>({
+const createPoint = () =>({
   type: getRandomArrayElement(pointTypes),
   destination: getRandomArrayElement(destinations),
-  id: id,
   cost: getRandomInt(MAX_PRICE),
   date:{
     start: Date(2024, 8, 20, 18, 30, 10, 0),
@@ -20,6 +19,12 @@ const createPoint = (id) =>({
 
 const mockPoints = Array.from( {length: POINTS_COUNT} , createPoint);
 
-const getRandomPoint = () => getRandomArrayElement(mockPoints);
+const getRandomPoint = () => {
+  const point = getRandomArrayElement(mockPoints);
+  return {
+    ...point,
+    id: nanoid(),
+  };
+};
 
 export {getRandomPoint};

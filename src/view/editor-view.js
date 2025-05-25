@@ -146,6 +146,6 @@ export default class EditorView extends AbstractView{
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
-    this.#editClick();
+    this.#editClick(this.#point);
   };
 }
