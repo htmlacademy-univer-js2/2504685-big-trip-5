@@ -1,6 +1,6 @@
 const BLANC_TEST =
 {
-  type: 'bus',
+  type: 'flight',
   destination: null,
   cost: 0,
   date: {
@@ -9,10 +9,6 @@ const BLANC_TEST =
   },
   offers: [
   ],
-  activeOffers:
-    0,
-  description:'',
-  photosSrc: ['https://loremflickr.com/248/152?random=$0)']
 };
 
 
@@ -57,9 +53,13 @@ const FilterTypes = {
   PAST: 'past',
 };
 
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 const AUTHORIZATION = 'Basic y16e6n415ya12nsj12jkosad';
 const END_POINT = 'https://21.objects.htmlacademy.pro/big-trip';
 
 
-export {AUTHORIZATION, END_POINT, FilterTypes, UserActions, UpdateTypes ,SortTypes, PresenterModes, MAX_PRICE, MAX_OFFER_ID,PHOTOS_COUNT, DATE_FORMAT_EDIT, DATE_FORMAT_POINT_DAY, DATE_FORMAT_POINT_HOURS, BLANC_TEST, POINTS_COUNT};
+export {TimeLimit, AUTHORIZATION, END_POINT, FilterTypes, UserActions, UpdateTypes ,SortTypes, PresenterModes, MAX_PRICE, MAX_OFFER_ID,PHOTOS_COUNT, DATE_FORMAT_EDIT, DATE_FORMAT_POINT_DAY, DATE_FORMAT_POINT_HOURS, BLANC_TEST, POINTS_COUNT};
