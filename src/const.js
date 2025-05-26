@@ -59,7 +59,7 @@ const FilterTypes = {
 
 
 const AUTHORIZATION = 'Basic y16e6n415ya12nsj12jkosad';
-const END_POINT = 'https://21.objects.htmlacademy.pro/big-trip';
+const END_POINT = 'https://24.objects.htmlacademy.pro/big-trip';
 
 
 export {AUTHORIZATION, END_POINT, FilterTypes, UserActions, UpdateTypes ,SortTypes, PresenterModes, MAX_PRICE, MAX_OFFER_ID,PHOTOS_COUNT, DATE_FORMAT_EDIT, DATE_FORMAT_POINT_DAY, DATE_FORMAT_POINT_HOURS, BLANC_TEST, POINTS_COUNT};
