@@ -183,7 +183,7 @@ export default class PointPresenter {
     );
   };
 
-  #onFavoriteClick = ( ) => {
+  #onFavoriteClick = () => {
     this.#onPointChange(
       UserActions.UPDATE_POINT,
       UpdateTypes.MINOR,

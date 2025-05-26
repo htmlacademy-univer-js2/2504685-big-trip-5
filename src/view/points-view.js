@@ -18,7 +18,7 @@ const createOffersTemplate = (offers, offersData) => {
 };
 
 
-function createPointsTemplate(point, offersData, destinationData ) {
+function createPointsTemplate(point, offersData, destinationData) {
   return (
     `
     <li class="trip-events__item">

@@ -27,7 +27,7 @@ export default class PointsModel extends Observable {
     const index = this.#points.findIndex((point) => point.id === newPoint.id);
 
     if (index === -1) {
-      throw new Error('can\'t find point' );
+      throw new Error('can\'t find point');
     }
 
     try {
@@ -63,7 +63,7 @@ export default class PointsModel extends Observable {
     const index = this.#points.findIndex((task) => task.id === newPoint.id);
 
     if (index === -1) {
-      throw new Error('can\'t find point' );
+      throw new Error('can\'t find point');
     }
 
     try {

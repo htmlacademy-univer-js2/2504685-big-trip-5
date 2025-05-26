@@ -58,8 +58,7 @@ const createOfferEditTemplate = (currentTypeOffers, offers, isDisabled) => {
     let isActive = false;
     if(offers){
       isActive = offers.some((offerId) => offerId === offer.id);
-    }
-    else{
+    } else{
       return '';
     }
     res += `
@@ -100,7 +99,8 @@ const createButtonsTemplate = (isNew, isDisabled, isDeleting, isSaving) =>{
   <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isDeleting ? 'Deleting...' : resetButtonText}</button>
   ${isNew ? '' : `<button class="event__rollup-btn" type="button" ${isDisabled ? 'disabled' : ''} >`}
 
-`);};
+`);
+};
 
 const createDestinationsSectionTemplate = (destination, curDestinationData) => {
   if(curDestinationData && !curDestinationData.description || !destination){
@@ -178,7 +178,8 @@ const createEditorViewTemplate = (point, allOffers, allDestinations) =>{
 
     `
 
-  );};
+  );
+};
 export default class EditorView extends AbstractStatefulView{
   #onSubmit;
   #datepickerFrom;
@@ -220,8 +221,7 @@ export default class EditorView extends AbstractStatefulView{
     if (this.#datepickerFrom) {
       this.#datepickerFrom.destroy();
       this.#datepickerFrom = null;
-    }
-    else if(this.#datepickerTo) {
+    } else if(this.#datepickerTo) {
       this.#datepickerTo.destroy();
       this.#datepickerTo = null;
     }

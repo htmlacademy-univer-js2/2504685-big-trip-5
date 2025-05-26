@@ -17,7 +17,7 @@ const createPoint = () =>({
 
 });
 
-const mockPoints = Array.from( {length: POINTS_COUNT} , createPoint);
+const mockPoints = Array.from({length: POINTS_COUNT} , createPoint);
 
 const getRandomPoint = () => {
   const point = getRandomArrayElement(mockPoints);
