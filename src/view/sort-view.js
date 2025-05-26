@@ -1,6 +1,31 @@
 
-import { SortTypes } from '../const.js';
+import { SortTypes } from '../const/point-const.js';
 import AbstractView from '../framework/view/abstract-view.js';
+
+export default class SortView extends AbstractView {
+  #currentSort;
+  #onSort;
+
+  constructor({currentSort, onSort}){
+    super();
+    this.#currentSort = currentSort;
+    this.#onSort = onSort;
+
+    this.element.addEventListener('click', this.#onSortClick);
+  }
+
+  get template() {
+    return createSortTemplate(this.#currentSort);
+  }
+
+  #onSortClick = (evt) => {
+    if(evt.target.tagName !== 'INPUT'){
+      return;
+    }
+    this.#onSort(evt.target.dataset.sortType);
+  };
+}
+
 
 function createSortTemplate(sort) {
   return (
@@ -32,28 +57,4 @@ function createSortTemplate(sort) {
             </div>
         </form>`
   );
-}
-
-export default class SortView extends AbstractView {
-  #currentSort;
-  #onSort;
-
-  constructor({currentSort, onSort}){
-    super();
-    this.#currentSort = currentSort;
-    this.#onSort = onSort;
-
-    this.element.addEventListener('click', this.#onSortClick);
-  }
-
-  get template() {
-    return createSortTemplate(this.#currentSort);
-  }
-
-  #onSortClick = (evt) => {
-    if(evt.target.tagName !== 'INPUT'){
-      return;
-    }
-    this.#onSort(evt.target.dataset.sortType);
-  };
 }

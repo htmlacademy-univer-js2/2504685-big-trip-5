@@ -1,5 +1,5 @@
 
-import { FilterTypes } from '../const';
+import { FilterTypes } from '../const/point-const';
 import Observable from '../framework/observable';
 
 

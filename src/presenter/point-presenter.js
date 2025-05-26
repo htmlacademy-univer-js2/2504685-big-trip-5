@@ -1,22 +1,19 @@
 import { render, replace, remove } from '../framework/render';
 import EditorView from '../view/editor-view';
 import TripsView from '../view/points-view';
-import {UserActions, UpdateTypes, PresenterModes } from '../const';
-import { isEscKey } from '../utils';
+import {UserActions, UpdateTypes } from '../const/api-const';
+import { isEscKey } from '../utils/utils';
+import { PresenterModes } from '../const/point-const';
 
 
 export default class PointPresenter {
-
-  #pointComponent = null;
-  #editComponent = null;
-
-
-  #point = null;
-
-  #pointsContainer = null;
-  #onPointChange = null;
-  #onModeChange = null;
-  #mode = PresenterModes.DEFAULT;
+  #pointComponent;
+  #editComponent;
+  #point;
+  #pointsContainer;
+  #onPointChange;
+  #onModeChange;
+  #mode;
   #offers;
   #destinations;
 
@@ -26,16 +23,8 @@ export default class PointPresenter {
     this.#offers = offers;
     this.#onModeChange = onModeChange;
     this.#destinations = destinations;
+    this.#mode = PresenterModes.DEFAULT;
   }
-
-  #onDocumentKeyDown = (evt) => {
-    if (isEscKey(evt.key)) {
-      evt.preventDefault();
-      this.#editComponent.reset(this.#point);
-      this.#replaceEditToPoint();
-      document.removeEventListener('keydown', this.#onDocumentKeyDown);
-    }
-  };
 
   init(point) {
 
@@ -51,32 +40,10 @@ export default class PointPresenter {
       ...point,
     };
 
-    this.#pointComponent = new TripsView(
-      {
-        point: this.#point,
-        offersObject: curTypeOffers,
-        curTypeDestination: curTypeDestination,
-        onTripClick: () => {
-          this.#replacePointToEdit();
-          document.addEventListener('keydown', this.#onDocumentKeyDown);
-        },
-        onFavoriteClick: this.#onFavoriteClick,
-        onSubmit: this.#onFormSubmit
-      }
-    );
+    this.#createTripsView(curTypeOffers, curTypeDestination);
+    this.#createEditorView(curTypeDestination);
 
-    this.#editComponent = new EditorView(
-      {
-        point: this.#point,
-        allOffers: this.#offers,
-        allDestinations: this.#destinations,
-        curTypeDestination: curTypeDestination,
-        onSubmit: this.#onFormSubmit,
-        deletePoint: this.#onDeletePoint
-      }
-    );
-
-    if(prevPoint === null || prevEdit === null){
+    if(!prevPoint || !prevEdit){
       render(this.#pointComponent, this.#pointsContainer);
       return;
     }
@@ -112,9 +79,9 @@ export default class PointPresenter {
     }
   }
 
-  setAborting() {
+  setAbording() {
     if (this.#mode === PresenterModes.DEFAULT) {
-      this.#editComponent.shake();
+      this.#pointComponent.shake();
       return;
     }
 
@@ -125,6 +92,7 @@ export default class PointPresenter {
         isDeleting: false,
       });
     };
+
 
     this.#editComponent.shake(resetFormState);
   }
@@ -142,6 +110,35 @@ export default class PointPresenter {
     remove(this.#editComponent);
   }
 
+  #createEditorView(curTypeDestination) {
+    this.#editComponent = new EditorView(
+      {
+        point: this.#point,
+        allOffers: this.#offers,
+        allDestinations: this.#destinations,
+        curTypeDestination: curTypeDestination,
+        onSubmit: this.#onFormSubmit,
+        deletePoint: this.#onDeletePoint
+      }
+    );
+  }
+
+  #createTripsView(curTypeOffers, curTypeDestination) {
+    this.#pointComponent = new TripsView(
+      {
+        point: this.#point,
+        offersObject: curTypeOffers,
+        curTypeDestination: curTypeDestination,
+        onTripClick: () => {
+          this.#replacePointToEdit();
+          document.addEventListener('keydown', this.#onDocumentKeyDown);
+        },
+        onFavoriteClick: this.#onFavoriteClick,
+        onSubmit: this.#onFormSubmit
+      }
+    );
+  }
+
   #replacePointToEdit () {
     replace(this.#editComponent, this.#pointComponent);
     document.addEventListener('keydown', this.#onDocumentKeyDown);
@@ -155,24 +152,6 @@ export default class PointPresenter {
     this.#mode = PresenterModes.DEFAULT;
   }
 
-  #onFormSubmit = (update) => {
-    if(update === undefined){
-      this.#editComponent.reset(this.#point);
-      this.#replaceEditToPoint();
-      return;
-    }
-    const isMajor = () =>
-      update.cost !== this.#point.cost ||
-        update.date.start !== this.#point.date.start ||
-        update.type !== this.#point.type;
-
-    this.#onPointChange(
-      UserActions.UPDATE_POINT,
-      isMajor() ? UpdateTypes.MAJOR : UpdateTypes.MINOR,
-      update
-    );
-  };
-
   #onDeletePoint = (point) =>{
     this.#onPointChange(
       UserActions.DELETE_POINT,
@@ -181,7 +160,30 @@ export default class PointPresenter {
     );
   };
 
-  #onFavoriteClick = ( ) => {
+  #onDocumentKeyDown = (evt) => {
+    if (isEscKey(evt.key)) {
+      evt.preventDefault();
+      this.#editComponent.reset(this.#point);
+      this.#replaceEditToPoint();
+      document.removeEventListener('keydown', this.#onDocumentKeyDown);
+    }
+  };
+
+  #onFormSubmit = (update) => {
+    if(update === undefined){
+      this.#editComponent.reset(this.#point);
+      this.#replaceEditToPoint();
+      return;
+    }
+
+    this.#onPointChange(
+      UserActions.UPDATE_POINT,
+      UpdateTypes.MINOR,
+      update
+    );
+  };
+
+  #onFavoriteClick = () => {
     this.#onPointChange(
       UserActions.UPDATE_POINT,
       UpdateTypes.MINOR,

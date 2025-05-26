@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-function createTripsContainer() {
+function createTripsContainerTemplate() {
   return (
     `
     <ul class="trip-events__list"></ul>
@@ -10,6 +10,6 @@ function createTripsContainer() {
 
 export default class TripsContainer extends AbstractView{
   get template() {
-    return createTripsContainer();
+    return createTripsContainerTemplate();
   }
 }
